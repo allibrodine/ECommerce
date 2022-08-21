@@ -3,20 +3,17 @@ const { Tag, Product, ProductTag, Category } = require('../../models');
 
 // The `/api/tags` endpoint
 
+//find all tags
 router.get('/', (req, res) => {
-  // find all tags...be sure to include its associated Product data
   Tag.findAll({
     attributes: ['id', 'tag_name'],
-    include: [
+    inlclude: [
       {
         model: Product,
-        attributes: ['id', 'product_name', 'price', 'stock', 'category_name'],
-        include: {
-            model: ProductTag,
-            attributes: ['id', 'product_id', 'tag_id']
-          }
-        } 
-    ]
+        attributes: ['id', 'product_name', 'price', 'stock', 'category_id'],
+        through: ProductTag,
+      },
+    ],
   })
   .then(dbTagData => res.json(dbTagData))
   .catch(err => {
@@ -25,27 +22,19 @@ router.get('/', (req, res) => {
   });
 });
 
+//find tag by ID
 router.get('/:id', (req, res) => {
-  // find a single tag by its `id`...be sure to include its associated Product data
   Tag.findOne({
     where: {
       id: req.params.id
     },
-    attributes: ['id', 'tag_name'],
-    include: [
+    inlclude: [
       {
         model: Product,
-        attributes: ['id', 'product_name', 'price', 'stock', 'category_name'],
-        include: {
-          model: Category,
-          attributes: ['category_name']
-        }
+        attributes: ['id', 'product_name', 'price', 'stock', 'category_id'],
+        through: ProductTag,
       },
-      {
-        model: ProductTag,
-        attributes: ['id', 'product_id', 'tag_id']
-      }
-    ]
+    ],
   })
   .then(dbTagData => {
     if (!dbTagData) {
@@ -60,8 +49,8 @@ router.get('/:id', (req, res) => {
   });
 });
 
+//create new tag
 router.post('/', (req, res) => {
-  // create a new tag
   Tag.create({
     tag_name: req.body.tag_name
   })
@@ -72,8 +61,8 @@ router.post('/', (req, res) => {
   });
 });
 
+//update tag by id
 router.put('/:id', (req, res) => {
-  // update a tag's name by its `id` value
   Tag.update({
     tag_name: req.body.tag_name
   },
@@ -95,8 +84,8 @@ router.put('/:id', (req, res) => {
   });
 });
 
+//delete tag by id
 router.delete('/:id', (req, res) => {
-  // delete on tag by its `id` value
   Tag.destroy({
     where: {
       id: req.params.id
